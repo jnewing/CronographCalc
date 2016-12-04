@@ -16,6 +16,12 @@ namespace ChronoCalc.Forms
 
         private double avgDeviation = 0;
 
+        private double highVelocity = 0;
+
+        private double lowVelocity = 0;
+
+        private double extremeSpread = 0;
+
 
         public frmMain()
         {
@@ -37,8 +43,7 @@ namespace ChronoCalc.Forms
 
             foreach (DataGridViewRow row in dataGridView1.Rows)
             {
-                if (row.Cells[0].Value == null
-                    || string.IsNullOrEmpty(row.Cells[0].Value.ToString()))
+                if (row.Cells[0].Value == null || string.IsNullOrEmpty(row.Cells[0].Value.ToString()))
                     continue;
 
                 int rowVal = int.Parse(row.Cells[0].Value.ToString());
@@ -83,6 +88,31 @@ namespace ChronoCalc.Forms
             lblDeviation.Text = string.Format("+/- {0} fps", Math.Round(avgDeviation, 2));
         }
 
+        /// <summary>
+        /// Calculates out extremities.
+        /// </summary>
+        private void velocityDiff()
+        {
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                if (row.Cells[0].Value == null || string.IsNullOrEmpty(row.Cells[0].Value.ToString()))
+                    continue;
+
+                int rowVal = int.Parse(row.Cells[0].Value.ToString());
+
+                if (rowVal >= highVelocity) highVelocity = rowVal;
+
+                if (lowVelocity == 0 || rowVal <= lowVelocity) lowVelocity = rowVal;
+
+                extremeSpread = highVelocity - lowVelocity;
+            }
+
+            lblHVelocity.Text = string.Format("{0} fps", highVelocity);
+            lblLVelocity.Text = string.Format("{0} fps", lowVelocity);
+            lblExtremeSpread.Text = string.Format("{0} fps", extremeSpread);
+
+        }
+
 
         #endregion
 
@@ -95,8 +125,7 @@ namespace ChronoCalc.Forms
         /// <param name="e"></param>
         private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            calcAvgVelocity();
-            calcAvgDeviation();
+            reCalculate();
 
             lblRoundCount.Text = string.Format("{0}", dataGridView1.RowCount - 1);
         }
@@ -111,8 +140,7 @@ namespace ChronoCalc.Forms
             if (dataGridView1.RowCount < 2)
                 resetAll();
 
-            calcAvgVelocity();
-            calcAvgDeviation();
+            reCalculate();
 
             lblRoundCount.Text = string.Format("{0}", dataGridView1.RowCount - 1);
         }
@@ -190,6 +218,7 @@ namespace ChronoCalc.Forms
         {
             calcAvgVelocity();
             calcAvgDeviation();
+            velocityDiff();
 
             lblRoundCount.Text = string.Format("{0}", dataGridView1.RowCount - 1);
         }
